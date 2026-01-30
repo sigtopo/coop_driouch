@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import Header from './components/Header';
-import Sidebar from './components/Sidebar';
-import MapComponent from './components/MapComponent';
-import { DATA_URLS, DEFAULT_VIEW, DEFAULT_ZOOM } from './constants';
-import { GeoDataState, CooperativeProperties } from './types';
+import Header from './components/Header.tsx';
+import Sidebar from './components/Sidebar.tsx';
+import MapComponent from './components/MapComponent.tsx';
+import { DATA_URLS, DEFAULT_VIEW, DEFAULT_ZOOM } from './constants.tsx';
+import { GeoDataState, CooperativeProperties } from './types.ts';
 
 const App: React.FC = () => {
   const [data, setData] = useState<GeoDataState>({

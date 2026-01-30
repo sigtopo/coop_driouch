@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Search, MapPin, Filter, ArrowRight } from 'lucide-react';
-import { CooperativeProperties } from '../types';
+import { CooperativeProperties } from '../types.ts';
 
 interface SidebarProps {
   communes: string[];

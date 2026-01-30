@@ -2,8 +2,8 @@
 import React, { useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, GeoJSON, ZoomControl, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { MAP_STYLES, DEFAULT_VIEW, DEFAULT_ZOOM } from '../constants';
-import { GeoDataState, CooperativeProperties } from '../types';
+import { MAP_STYLES, DEFAULT_VIEW, DEFAULT_ZOOM } from '../constants.tsx';
+import { GeoDataState, CooperativeProperties } from '../types.ts';
 
 interface MapComponentProps {
   geoData: GeoDataState;
