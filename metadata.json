@@ -1,0 +1,7 @@
+{
+  "name": "SIGaid Driouch - Platforme des Coopératives",
+  "description": "Une plateforme SIG professionnelle pour la gestion et la visualisation des coopératives dans la province de Driouch, incluant le filtrage par commune et des outils de recherche avancés.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}

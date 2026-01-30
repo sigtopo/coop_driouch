@@ -1,0 +1,57 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>SIGaid Driouch</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .leaflet-container { width: 100%; height: 100%; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #00AA01; border-radius: 10px; }
+    .feature-label {
+      background: transparent;
+      border: none;
+      font-size: 10px;
+      font-weight: 600;
+      color: #fff;
+      text-shadow: 1px 1px 2px #000;
+      pointer-events: none;
+    }
+    /* Styles pro pour les popups Leaflet */
+    .custom-popup-professional .leaflet-popup-content-wrapper {
+      padding: 0;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    }
+    .custom-popup-professional .leaflet-popup-content {
+      margin: 0;
+      width: auto !important;
+    }
+    .custom-popup-professional .leaflet-popup-tip-container {
+      margin-top: -1px;
+    }
+  </style>
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
+    "leaflet": "https://esm.sh/leaflet@^1.9.4",
+    "react-leaflet": "https://esm.sh/react-leaflet@^5.0.0"
+  }
+}
+</script>
+</head>
+<body class="bg-gray-50 overflow-hidden">
+  <div id="root"></div>
+</body>
+</html>
