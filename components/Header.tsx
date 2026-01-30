@@ -13,8 +13,12 @@ const Header: React.FC = () => {
           />
         </div>
         <div className="border-l border-gray-200 pl-4">
-          <h1 className="text-lg md:text-xl font-black text-gray-900 tracking-tight">SIGaid <span className="text-green-600">Driouch</span></h1>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest -mt-1">Observatoire des Coopératives</p>
+          <h1 className="text-sm md:text-lg font-black text-gray-900 tracking-tight leading-tight">
+            Localisation des Coopératives <span className="text-green-600 block md:inline">Driouch</span>
+          </h1>
+          <p className="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest -mt-0.5">
+            Observatoire des Coopératives
+          </p>
         </div>
       </div>
       

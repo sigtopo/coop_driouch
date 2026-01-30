@@ -3,7 +3,7 @@
 <html lang="fr" dir="ltr">
 <head>
   <meta charset="UTF-8">
-  <title>SIGaid Driouch | Platforme des Coopératives</title>
+  <title>Localisation des Coopératives Driouch | Observatoire</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -27,24 +27,26 @@
       padding: 0;
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+      box-shadow: 0 15px 30px -5px rgb(0 0 0 / 0.3);
+      border: 1px solid rgba(255,255,255,0.2);
     }
-    .custom-popup-professional .leaflet-popup-content { margin: 0; width: 300px !important; }
+    .custom-popup-professional .leaflet-popup-content { margin: 0; width: 320px !important; }
+    .custom-popup-professional .leaflet-popup-tip { background: #fff; }
     
     @media (max-width: 768px) {
       .sidebar-container {
         position: fixed;
-        bottom: 0;
+        top: 0;
         left: 0;
-        right: 0;
-        width: 100% !important;
-        height: 50vh !important;
-        z-index: 2000;
-        border-radius: 20px 20px 0 0;
-        transform: translateY(100%);
-        transition: transform 0.3s ease-out;
+        bottom: 0;
+        width: 85% !important;
+        max-width: 320px;
+        z-index: 3000;
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 0 20px 20px 0;
       }
-      .sidebar-open { transform: translateY(0); }
+      .sidebar-open { transform: translateX(0); }
     }
   </style>
 <script type="importmap">

@@ -1,23 +1,23 @@
 
 export interface CooperativeProperties {
-  NomCoop?: string;
-  activité?: string;
-  X?: any;
-  Y?: any;
-  Province?: string;
-  Cercle?: string;
-  Commune?: string;
-  Douar_Quar?: string;
-  Date_creat?: string;
-  "nbr adhér"?: any;
-  nbr_femmes?: any;
-  nbr_jeunes?: any;
-  capitalsoc?: any;
-  NomPrenom?: string;
-  Genre?: string;
-  DateNaissa?: string;
-  "Niveau sco"?: string;
-  Tel?: string;
+  "Filière d'activité"?: string;
+  "Nom de coopérative"?: string;
+  "X"?: any;
+  "Y"?: any;
+  "Province"?: string;
+  "Cercle"?: string;
+  "Commune"?: string;
+  "Douar/Quartier"?: string;
+  "Date de création"?: string;
+  "Nombre des adhérents"?: any;
+  "Nombre des femmes"?: any;
+  "Nombre des jeunes"?: any;
+  "Capital social"?: any;
+  "Nom et prénom président/gestionnaire"?: string;
+  "Genre"?: string;
+  "Date de naissance"?: string;
+  "Niveau scolaire"?: string;
+  "Tel"?: string;
   [key: string]: any;
 }
 

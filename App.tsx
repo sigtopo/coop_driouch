@@ -49,27 +49,32 @@ const App: React.FC = () => {
   const communeListFromCoops = useMemo(() => {
     if (!data.cooperatives) return [];
     const names = data.cooperatives.features
-      .map((f: any) => f.properties.Commune || f.properties.commune)
+      .map((f: any) => f.properties.Commune)
       .filter((n: any) => n && n !== "Commune");
     return Array.from(new Set(names)).sort() as string[];
   }, [data.cooperatives]);
 
   const filteredCooperatives = useMemo(() => {
     if (!data.cooperatives) return [];
-    return data.cooperatives.features.filter((f: any) => {
-      const props = f.properties as CooperativeProperties;
-      if (!props.NomCoop && !props.nom) return false;
+    
+    return data.cooperatives.features
+      .filter((f: any) => {
+        const props = f.properties as CooperativeProperties;
+        const coopName = props["Nom de coopérative"] || props.nom || '';
+        const repName = props["Nom et prénom président/gestionnaire"] || '';
+        const commune = props.Commune || '';
+        
+        const matchesCoopSearch = coopName.toLowerCase().includes(coopSearch.toLowerCase());
+        const matchesNameSearch = repName.toLowerCase().includes(nameSearch.toLowerCase());
+        const matchesCommune = selectedCommune === 'All' || commune === selectedCommune;
 
-      const coopName = (props.NomCoop || props.nom || '').toLowerCase();
-      const repName = (props.NomPrenom || '').toLowerCase();
-      const commune = (props.Commune || props.commune || '');
-      
-      const matchesCoopSearch = coopName.includes(coopSearch.toLowerCase());
-      const matchesNameSearch = repName.includes(nameSearch.toLowerCase());
-      const matchesCommune = selectedCommune === 'All' || commune === selectedCommune;
-
-      return matchesCoopSearch && matchesNameSearch && matchesCommune;
-    });
+        return matchesCoopSearch && matchesNameSearch && matchesCommune;
+      })
+      .sort((a: any, b: any) => {
+        const nameA = (a.properties["Nom de coopérative"] || '').toLowerCase();
+        const nameB = (b.properties["Nom de coopérative"] || '').toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
   }, [data.cooperatives, coopSearch, nameSearch, selectedCommune]);
 
   if (data.loading) {
@@ -87,10 +92,10 @@ const App: React.FC = () => {
     <div className="flex flex-col h-screen overflow-hidden bg-white">
       <Header />
       
-      {/* Mobile Toggle Trigger */}
+      {/* Mobile Menu Button - Top Left */}
       <button 
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="md:hidden fixed bottom-6 right-6 z-[2500] w-14 h-14 bg-green-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-green-700 transition-all active:scale-95"
+        className="md:hidden fixed top-20 left-4 z-[2500] w-12 h-12 bg-green-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-green-700 transition-all active:scale-95"
       >
         <Menu size={24} />
       </button>
