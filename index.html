@@ -1,380 +1,57 @@
 
 <!DOCTYPE html>
-<html lang="fr" dir="ltr">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>SIGaid Driouch – Plateforme des Coopératives</title>
+  <title>SIGaid Driouch</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <!-- Tailwind CSS & Leaflet -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
   <style>
-    body { font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
-    #map { flex: 1; width: 100%; height: 100%; z-index: 1; }
-    
-    .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+    body { font-family: 'Inter', sans-serif; }
+    .leaflet-container { width: 100%; height: 100%; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #00AA01; border-radius: 10px; }
-
-    /* Professional Leaflet Popups */
-    .leaflet-popup-content-wrapper { padding: 0; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
-    .leaflet-popup-content { margin: 0 !important; width: 350px !important; }
-    
     .feature-label {
       background: transparent;
       border: none;
       font-size: 10px;
-      font-weight: 700;
+      font-weight: 600;
       color: #fff;
       text-shadow: 1px 1px 2px #000;
       pointer-events: none;
     }
-
-    .legend-control {
-      background: rgba(255, 255, 255, 0.95);
-      padding: 12px;
+    /* Styles pro pour les popups Leaflet */
+    .custom-popup-professional .leaflet-popup-content-wrapper {
+      padding: 0;
       border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      border: 1px solid rgba(0,0,0,0.05);
-      backdrop-filter: blur(5px);
+      overflow: hidden;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    }
+    .custom-popup-professional .leaflet-popup-content {
+      margin: 0;
+      width: auto !important;
+    }
+    .custom-popup-professional .leaflet-popup-tip-container {
+      margin-top: -1px;
     }
   </style>
 <script type="importmap">
 {
   "imports": {
+    "react/": "https://esm.sh/react@^19.2.4/",
     "react": "https://esm.sh/react@^19.2.4",
     "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
-    "react/": "https://esm.sh/react@^19.2.4/",
     "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
-    "react-leaflet": "https://esm.sh/react-leaflet@^5.0.0",
-    "leaflet": "https://esm.sh/leaflet@^1.9.4"
+    "leaflet": "https://esm.sh/leaflet@^1.9.4",
+    "react-leaflet": "https://esm.sh/react-leaflet@^5.0.0"
   }
 }
 </script>
 </head>
-<body class="bg-gray-50">
-
-  <!-- Header -->
-  <header class="h-16 flex items-center justify-between px-6 bg-gradient-to-r from-[#00AA01] to-white shadow-md z-[2000] flex-shrink-0">
-    <div class="flex items-center gap-4">
-      <img src="https://aid-maroc.com/wp-content/uploads/2021/04/Logo-222.png" alt="Logo" class="h-10">
-      <div>
-        <h1 class="text-lg font-bold text-gray-800 leading-tight">SIGaid Driouch</h1>
-        <p class="text-[10px] font-bold text-green-700 uppercase tracking-widest">Plateforme des Coopératives</p>
-      </div>
-    </div>
-    <div class="hidden sm:flex bg-white/50 px-3 py-1 rounded-full border border-green-100 text-xs font-semibold text-gray-600">
-      Province de Driouch
-    </div>
-  </header>
-
-  <div class="flex flex-1 overflow-hidden">
-    <!-- Sidebar -->
-    <aside class="w-80 bg-white shadow-2xl flex flex-col z-[1500] border-r border-gray-200">
-      <!-- Filters -->
-      <div class="p-4 bg-gray-50 border-b border-gray-200 space-y-4">
-        <div>
-          <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 ml-1">Filtrer par Commune</label>
-          <select id="communeFilter" class="w-full p-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 outline-none cursor-pointer">
-            <option value="All">Toutes les communes</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 ml-1">Recherche Rapide</label>
-          <input id="searchInput" type="text" placeholder="Nom de coopérative..." class="w-full p-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 outline-none">
-        </div>
-      </div>
-
-      <!-- Results List -->
-      <div id="resultsList" class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
-        <div class="text-center py-10 text-gray-400 text-sm">Chargement des données...</div>
-      </div>
-
-      <div class="p-3 bg-gray-50 text-[9px] text-gray-400 text-center border-t border-gray-200 uppercase font-bold tracking-tighter">
-        © 2024 SIGaid – AID MAROC
-      </div>
-    </aside>
-
-    <!-- Map Container -->
-    <main class="flex-1 relative">
-      <div id="map"></div>
-    </main>
-  </div>
-
-  <script>
-    /* -----------------------------------------------------------
-       CONFIG & DATA
-    ----------------------------------------------------------- */
-    const DATA_URLS = {
-      PROVINCE: "https://raw.githubusercontent.com/geotoposig/AIDSIG/refs/heads/main/PROVINCE_DRIOUCH.geojson",
-      COMMUNES: "https://raw.githubusercontent.com/geotoposig/AIDSIG/refs/heads/main/COMMUNES_DRIOUCH.geojson",
-      COOPERATIVES: "https://raw.githubusercontent.com/geotoposig/AIDSIG/refs/heads/main/Cooperatives_Driouch.geojson"
-    };
-
-    let map, coopLayer, communesLayer, provinceLayer;
-    let allData = { province: null, communes: null, cooperatives: [] };
-
-    /* -----------------------------------------------------------
-       INITIALIZATION
-    ----------------------------------------------------------- */
-    function initMap() {
-      map = L.map('map', { zoomControl: false }).setView([34.95, -3.40], 9);
-
-      // Basemap: Google Hybrid
-      L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-        maxZoom: 20,
-        attribution: '© Google Maps'
-      }).addTo(map);
-
-      L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-      addLegend();
-    }
-
-    function addLegend() {
-      const legend = L.control({ position: 'bottomright' });
-      legend.onAdd = function() {
-        const div = L.DomUtil.create('div', 'legend-control');
-        div.innerHTML = `
-          <h4 class="text-[10px] font-bold text-gray-500 uppercase mb-2 text-center border-b pb-1">Légende</h4>
-          <div class="space-y-2">
-            <div class="flex items-center gap-2 text-[11px] font-semibold text-gray-700">
-              <span class="w-4 h-0.5 bg-white border border-gray-400"></span> Province
-            </div>
-            <div class="flex items-center gap-2 text-[11px] font-semibold text-gray-700">
-              <span class="w-4 h-0.5 bg-yellow-400 border border-yellow-500 border-dashed"></span> Communes
-            </div>
-            <div class="flex items-center gap-2 text-[11px] font-semibold text-gray-700">
-              <span class="w-3 h-3 rounded-full bg-green-500 border border-white shadow-sm"></span> Coopératives
-            </div>
-          </div>
-        `;
-        return div;
-      };
-      legend.addTo(map);
-    }
-
-    /* -----------------------------------------------------------
-       UI RENDERING
-    ----------------------------------------------------------- */
-    function formatCoord(val) {
-      if (!val) return '-';
-      const num = parseFloat(val);
-      return isNaN(num) ? val : num.toFixed(2);
-    }
-
-    function createPopupContent(p) {
-      const name = p.NomCoop || "Coopérative";
-      const activity = p.activité || "Secteur non défini";
-      
-      return `
-        <div class="font-sans">
-          <div class="bg-green-600 text-white p-4">
-            <h3 class="font-bold text-base leading-tight">${name}</h3>
-            <p class="text-[10px] font-medium opacity-90 mt-1">${activity}</p>
-          </div>
-          <div class="p-4 bg-white max-h-[350px] overflow-y-auto custom-scrollbar shadow-inner" dir="rtl">
-            
-            <!-- SECTION 1: LOCALISATION -->
-            <h4 class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b pb-1 text-left" dir="ltr">📍 Localisation & Admin</h4>
-            <table class="w-full text-xs mb-4" dir="ltr">
-              <tr class="border-b border-gray-50"><td class="py-1 text-gray-500 w-1/3 text-left">Commune</td><td class="py-1 font-medium text-right text-gray-800">${p.Commune || '-'}</td></tr>
-              <tr class="border-b border-gray-50"><td class="py-1 text-gray-500 text-left">Cercle</td><td class="py-1 font-medium text-right text-gray-800">${p.Cercle || '-'}</td></tr>
-              <tr class="border-b border-gray-50"><td class="py-1 text-gray-500 text-left">Douar/Quartier</td><td class="py-1 font-medium text-right text-gray-800">${p.Douar_Quar || '-'}</td></tr>
-              <tr><td class="py-1 text-gray-500 text-left">Coordonnées</td><td class="py-1 font-mono text-[9px] text-right text-gray-800">${formatCoord(p.X)}, ${formatCoord(p.Y)}</td></tr>
-            </table>
-
-            <!-- SECTION 2: CONTACT -->
-            <h4 class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b pb-1 text-left" dir="ltr">👤 Représentant & Contact</h4>
-            <table class="w-full text-xs mb-4" dir="ltr">
-              <tr class="border-b border-gray-50"><td class="py-1 text-gray-500 text-left">Nom Complet</td><td class="py-1 font-bold text-right text-gray-800">${p.NomPrenom || '-'}</td></tr>
-              <tr class="border-b border-gray-50"><td class="py-1 text-gray-500 text-left">Téléphone</td><td class="py-1 font-bold text-right text-green-600">${p.Tel || '-'}</td></tr>
-              <tr class="border-b border-gray-50"><td class="py-1 text-gray-500 text-left">Genre</td><td class="py-1 font-medium text-right">${p.Genre || '-'}</td></tr>
-              <tr class="border-b border-gray-50"><td class="py-1 text-gray-500 text-left">Scolarité</td><td class="py-1 font-medium text-right">${p["Niveau sco"] || '-'}</td></tr>
-              <tr><td class="py-1 text-gray-500 text-left">Date création</td><td class="py-1 font-medium text-right italic text-gray-400 text-[10px]">${p.Date_creat || '-'}</td></tr>
-            </table>
-
-            <!-- SECTION 3: STATS -->
-            <h4 class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b pb-1 text-left" dir="ltr">📊 Statistiques & Capital</h4>
-            <div class="grid grid-cols-2 gap-2" dir="ltr">
-              <div class="bg-gray-50 p-2 rounded border border-gray-100">
-                <span class="block text-[9px] text-gray-400 text-left">Nombre des adhérents</span>
-                <span class="text-xs font-bold text-gray-700">${p["nbr adhér"] || 0}</span>
-              </div>
-              <div class="bg-gray-50 p-2 rounded border border-gray-100">
-                <span class="block text-[9px] text-gray-400 text-left">Femmes / Jeunes</span>
-                <span class="text-xs font-bold text-pink-600">${p.nbr_femmes || 0}</span> / <span class="text-xs font-bold text-blue-600">${p.nbr_jeunes || 0}</span>
-              </div>
-              <div class="bg-green-50 p-2 rounded border border-green-100 col-span-2">
-                <span class="block text-[9px] text-green-600 text-left font-bold">Capital Social</span>
-                <span class="text-sm font-black text-green-800">${p.capitalsoc || 0} DH</span>
-              </div>
-            </div>
-          </div>
-          <div class="bg-gray-100 p-2 text-center text-[9px] text-gray-400 border-t border-gray-200 uppercase font-bold tracking-widest">
-            Plateforme SIGaid – AID MAROC
-          </div>
-        </div>
-      `;
-    }
-
-    /* -----------------------------------------------------------
-       DATA FETCH & FILTERING
-    ----------------------------------------------------------- */
-    async function loadData() {
-      try {
-        const [prov, comm, coop] = await Promise.all([
-          fetch(DATA_URLS.PROVINCE).then(r => r.json()),
-          fetch(DATA_URLS.COMMUNES).then(r => r.json()),
-          fetch(DATA_URLS.COOPERATIVES).then(r => r.json())
-        ]);
-
-        allData.province = prov;
-        allData.communes = comm;
-        allData.cooperatives = coop.features.filter(f => f.geometry); // Filtrer les entités sans géo
-
-        renderProvince();
-        renderCommunes();
-        populateCommuneFilter();
-        applyFilters();
-
-      } catch (e) {
-        console.error(e);
-        document.getElementById('resultsList').innerHTML = `<div class="p-4 text-red-500 text-xs">Erreur de chargement.</div>`;
-      }
-    }
-
-    function renderProvince() {
-      provinceLayer = L.geoJSON(allData.province, {
-        style: { color: "#FFF", weight: 3, fillOpacity: 0, interactive: false }
-      }).addTo(map);
-      map.fitBounds(provinceLayer.getBounds());
-    }
-
-    function renderCommunes() {
-      communesLayer = L.geoJSON(allData.communes, {
-        style: { color: "#FACC15", weight: 2, dashArray: '5,5', fillOpacity: 0.05, interactive: false }
-      }).addTo(map);
-    }
-
-    function populateCommuneFilter() {
-      const select = document.getElementById('communeFilter');
-      const names = allData.communes.features.map(f => f.properties.NAME || f.properties.Name || f.properties.nom).filter(Boolean);
-      const uniqueNames = [...new Set(names)].sort();
-      
-      uniqueNames.forEach(name => {
-        const opt = document.createElement('option');
-        opt.value = name;
-        opt.textContent = name;
-        select.appendChild(opt);
-      });
-    }
-
-    function applyFilters() {
-      const commune = document.getElementById('communeFilter').value;
-      const query = document.getElementById('searchInput').value.toLowerCase();
-
-      const filtered = allData.cooperatives.filter(f => {
-        const p = f.properties;
-        const nameMatch = (p.NomCoop || "").toLowerCase().includes(query);
-        const communeMatch = commune === "All" || p.Commune === commune;
-        return nameMatch && communeMatch;
-      });
-
-      updateMap(filtered);
-      updateSidebarList(filtered);
-
-      // Fit bounds if specific commune selected
-      if (commune !== "All") {
-        const communeGeom = allData.communes.features.find(f => (f.properties.NAME || f.properties.Name || f.properties.nom) === commune);
-        if (communeGeom) map.fitBounds(L.geoJSON(communeGeom).getBounds(), { padding: [20, 20] });
-      }
-    }
-
-    function updateMap(features) {
-      if (coopLayer) map.removeLayer(coopLayer);
-
-      coopLayer = L.geoJSON({ type: "FeatureCollection", features: features }, {
-        pointToLayer: (feature, latlng) => {
-          return L.circleMarker(latlng, {
-            radius: 7,
-            fillColor: "#22C55E",
-            color: "#FFF",
-            weight: 2,
-            opacity: 1,
-            fillOpacity: 1
-          });
-        },
-        onEachFeature: (feature, layer) => {
-          const p = feature.properties;
-          layer.bindPopup(createPopupContent(p));
-          
-          if (p.NomCoop) {
-            layer.bindTooltip(p.NomCoop, { 
-              direction: 'top', 
-              className: 'feature-label',
-              offset: [0, -8]
-            });
-          }
-
-          layer.on('mouseover', function(e) {
-            this.setStyle({ fillColor: '#F43F5E', radius: 9 });
-          });
-          layer.on('mouseout', function(e) {
-            this.setStyle({ fillColor: '#22C55E', radius: 7 });
-          });
-        }
-      }).addTo(map);
-    }
-
-    function updateSidebarList(features) {
-      const list = document.getElementById('resultsList');
-      list.innerHTML = "";
-
-      if (features.length === 0) {
-        list.innerHTML = `<div class="text-center py-10 text-gray-400 text-xs">Aucun résultat.</div>`;
-        return;
-      }
-
-      features.forEach((f, idx) => {
-        const p = f.properties;
-        const btn = document.createElement('button');
-        btn.className = "w-full text-left p-3 rounded-xl border border-gray-100 hover:border-green-200 hover:bg-green-50 transition-all shadow-sm group bg-white";
-        btn.innerHTML = `
-          <div class="flex justify-between items-start gap-2">
-            <div>
-              <h3 class="text-xs font-bold text-gray-800 group-hover:text-green-700">${p.NomCoop || 'Sans Nom'}</h3>
-              <p class="text-[10px] text-gray-400 mt-1 uppercase font-semibold">📍 ${p.Commune || '-'}</p>
-            </div>
-            <span class="text-green-500 opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all">→</span>
-          </div>
-        `;
-        btn.onclick = () => {
-          const layer = coopLayer.getLayers().find(l => l.feature === f);
-          if (layer) {
-            map.setView(layer.getLatLng(), 15);
-            layer.openPopup();
-          }
-        };
-        list.appendChild(btn);
-      });
-    }
-
-    /* -----------------------------------------------------------
-       EVENT LISTENERS
-    ----------------------------------------------------------- */
-    document.getElementById('communeFilter').addEventListener('change', applyFilters);
-    document.getElementById('searchInput').addEventListener('input', applyFilters);
-
-    window.onload = () => {
-      initMap();
-      loadData();
-    };
-
-  </script>
+<body class="bg-gray-50 overflow-hidden">
+  <div id="root"></div>
 </body>
 </html>
