@@ -3,8 +3,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import MapComponent from './components/MapComponent';
-import { DATA_URLS, DEFAULT_VIEW, DEFAULT_ZOOM } from './constants';
+import { DATA_URLS } from './constants';
 import { GeoDataState, CooperativeProperties } from './types';
+import { Menu } from 'lucide-react';
 
 const App: React.FC = () => {
   const [data, setData] = useState<GeoDataState>({
@@ -16,8 +17,10 @@ const App: React.FC = () => {
   });
 
   const [selectedCommune, setSelectedCommune] = useState<string>('All');
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [coopSearch, setCoopSearch] = useState<string>('');
+  const [nameSearch, setNameSearch] = useState<string>('');
   const [selectedCoopId, setSelectedCoopId] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(window.innerWidth > 768);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,61 +39,64 @@ const App: React.FC = () => {
           error: null,
         });
       } catch (err) {
-        setData(prev => ({ ...prev, loading: false, error: "Erreur lors du chargement des données SIG." }));
+        setData(prev => ({ ...prev, loading: false, error: "Erreur de chargement des données" }));
       }
     };
 
     fetchData();
   }, []);
 
-  // List of unique communes for the dropdown
-  const communeList = useMemo(() => {
-    if (!data.communes) return [];
-    const names = data.communes.features.map((f: any) => 
-      f.properties.NAME || f.properties.Name || f.properties.nom
-    ).filter(Boolean);
+  const communeListFromCoops = useMemo(() => {
+    if (!data.cooperatives) return [];
+    const names = data.cooperatives.features
+      .map((f: any) => f.properties.Commune || f.properties.commune)
+      .filter((n: any) => n && n !== "Commune");
     return Array.from(new Set(names)).sort() as string[];
-  }, [data.communes]);
+  }, [data.cooperatives]);
 
-  // Filtered cooperatives based on search and commune selection
   const filteredCooperatives = useMemo(() => {
     if (!data.cooperatives) return [];
     return data.cooperatives.features.filter((f: any) => {
       const props = f.properties as CooperativeProperties;
-      // Use NomCoop as the primary name field
-      const name = (props.NomCoop || props.nom || props.NAME || props.Name || '').toLowerCase();
+      if (!props.NomCoop && !props.nom) return false;
+
+      const coopName = (props.NomCoop || props.nom || '').toLowerCase();
+      const repName = (props.NomPrenom || '').toLowerCase();
       const commune = (props.Commune || props.commune || '');
       
-      const matchesSearch = name.includes(searchQuery.toLowerCase());
+      const matchesCoopSearch = coopName.includes(coopSearch.toLowerCase());
+      const matchesNameSearch = repName.includes(nameSearch.toLowerCase());
       const matchesCommune = selectedCommune === 'All' || commune === selectedCommune;
 
-      return matchesSearch && matchesCommune;
+      return matchesCoopSearch && matchesNameSearch && matchesCommune;
     });
-  }, [data.cooperatives, searchQuery, selectedCommune]);
+  }, [data.cooperatives, coopSearch, nameSearch, selectedCommune]);
 
   if (data.loading) {
     return (
-      <div className="h-screen w-screen flex flex-col items-center justify-center bg-white">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-green-600 mb-4"></div>
-        <p className="text-gray-600 font-medium">Chargement des données cartographiques...</p>
+      <div className="h-screen w-screen flex flex-col items-center justify-center bg-gray-900">
+        <div className="relative flex flex-col items-center">
+          <div className="w-16 h-16 border-4 border-white/10 border-t-green-500 rounded-full animate-spin"></div>
+          <p className="mt-6 text-xs font-bold text-gray-400 animate-pulse tracking-widest uppercase">Initialisation SIGaid...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
+    <div className="flex flex-col h-screen overflow-hidden bg-white">
       <Header />
+      
+      {/* Mobile Toggle Trigger */}
+      <button 
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        className="md:hidden fixed bottom-6 right-6 z-[2500] w-14 h-14 bg-green-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-green-700 transition-all active:scale-95"
+      >
+        <Menu size={24} />
+      </button>
+
       <div className="flex flex-1 overflow-hidden relative">
-        <Sidebar 
-          communes={communeList}
-          selectedCommune={selectedCommune}
-          onCommuneChange={setSelectedCommune}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          cooperatives={filteredCooperatives}
-          onCooperativeSelect={setSelectedCoopId}
-        />
-        <main className="flex-1 relative">
+        <main className="flex-1 relative order-2 md:order-1">
           <MapComponent 
             geoData={data} 
             filteredCooperatives={filteredCooperatives}
@@ -98,6 +104,23 @@ const App: React.FC = () => {
             selectedCoopId={selectedCoopId}
           />
         </main>
+        
+        <Sidebar 
+          communes={communeListFromCoops}
+          selectedCommune={selectedCommune}
+          onCommuneChange={setSelectedCommune}
+          coopSearch={coopSearch}
+          onCoopSearchChange={setCoopSearch}
+          nameSearch={nameSearch}
+          onNameSearchChange={setNameSearch}
+          cooperatives={filteredCooperatives}
+          onCooperativeSelect={(id) => {
+            setSelectedCoopId(id);
+            if (window.innerWidth < 768) setIsSidebarOpen(false);
+          }}
+          isOpen={isSidebarOpen}
+          onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+        />
       </div>
     </div>
   );
